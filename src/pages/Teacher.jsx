@@ -8,6 +8,7 @@ export default function Teacher() {
   const [teacherName, setTeacherName] = useState('')
   const [selectedClass, setSelectedClass] = useState('')
   const [classes, setClasses] = useState([])
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -46,12 +47,124 @@ export default function Teacher() {
     { id: 'students', icon: '🎓', label: 'Students' },
   ]
 
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId)
+    setSidebarOpen(false) // close sidebar on mobile after selecting
+  }
+
+  const handleClassChange = (classId) => {
+    setSelectedClass(classId)
+    setSidebarOpen(false) // close sidebar after selecting class
+  }
+
   return (
-    <div style={{minHeight:'100vh',background:'#f7f9ff',fontFamily:'Outfit,sans-serif',display:'flex'}}>
+    <div style={{minHeight:'100vh',background:'#f7f9ff',fontFamily:'Outfit,sans-serif'}}>
+
+      <style>{`
+        .sidebar-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.5);
+          z-index: 150;
+        }
+        .sidebar {
+          position: fixed;
+          top: 0; left: 0; bottom: 0;
+          width: 240px;
+          background: #0a1628;
+          display: flex;
+          flex-direction: column;
+          z-index: 200;
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+        }
+        .main-content {
+          margin-left: 0;
+          padding-top: 64px;
+        }
+
+        @media(min-width: 768px) {
+          .sidebar {
+            transform: translateX(0) !important;
+          }
+          .sidebar-overlay {
+            display: none !important;
+          }
+          .main-content {
+            margin-left: 240px;
+            padding-top: 0;
+          }
+          .mobile-topbar {
+            display: none !important;
+          }
+        }
+
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .sidebar-overlay.open {
+          display: block !important;
+        }
+      `}</style>
+
+      {/* MOBILE TOP BAR */}
+      <div className="mobile-topbar" style={{
+        position:'fixed',top:0,left:0,right:0,zIndex:100,
+        background:'#0a1628',padding:'12px 16px',
+        display:'flex',alignItems:'center',justifyContent:'space-between'
+      }}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <button onClick={() => setSidebarOpen(true)}
+            style={{background:'none',border:'none',cursor:'pointer',padding:4,display:'flex',flexDirection:'column',gap:4}}>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}/>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}/>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}/>
+          </button>
+          <img src={logo} alt="SVB" style={{width:32,height:32,borderRadius:'50%',objectFit:'cover'}}/>
+          <span style={{color:'#fff',fontSize:14,fontWeight:500}}>Teacher Portal</span>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          {/* Class indicator */}
+          {selectedClass && (
+            <span style={{fontSize:12,color:'rgba(255,255,255,0.7)',background:'rgba(255,255,255,0.1)',padding:'4px 10px',borderRadius:20}}>
+              {classes.find(c => c.id == selectedClass)?.class_name}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* MOBILE TAB BAR — bottom */}
+      <div className="mobile-topbar" style={{
+        position:'fixed',bottom:0,left:0,right:0,zIndex:100,
+        background:'#fff',borderTop:'1px solid #e8f0fe',
+        display:'flex',padding:'0'
+      }}>
+        {tabs.map(t => (
+          <button key={t.id} onClick={() => handleTabChange(t.id)}
+            style={{
+              flex:1,padding:'10px 4px',border:'none',cursor:'pointer',
+              background:'transparent',
+              color: activeTab===t.id ? '#1a4fa0' : '#888',
+              fontSize:10,fontFamily:'Outfit,sans-serif',fontWeight:500,
+              borderTop: activeTab===t.id ? '2px solid #1a4fa0' : '2px solid transparent',
+              display:'flex',flexDirection:'column',alignItems:'center',gap:3
+            }}>
+            <span style={{fontSize:20}}>{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* SIDEBAR OVERLAY */}
+      <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
+        onClick={() => setSidebarOpen(false)}/>
 
       {/* SIDEBAR */}
-      <div style={{width:220,background:'#0a1628',display:'flex',flexDirection:'column',position:'fixed',top:0,left:0,bottom:0,zIndex:100}}>
-        <div style={{padding:'24px 20px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
+      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+
+        {/* Logo */}
+        <div style={{padding:'20px 20px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
           <div style={{display:'flex',alignItems:'center',gap:10}}>
             <img src={logo} alt="SVB" style={{width:36,height:36,borderRadius:'50%',objectFit:'cover',border:'2px solid rgba(255,255,255,0.2)'}}/>
             <div style={{fontFamily:'Cormorant Garamond,serif',fontSize:12,color:'#fff',lineHeight:1.3}}>
@@ -60,7 +173,8 @@ export default function Teacher() {
           </div>
         </div>
 
-        <div style={{padding:'16px 20px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
+        {/* Teacher info */}
+        <div style={{padding:'14px 20px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
           <div style={{width:36,height:36,borderRadius:'50%',background:'#0891b2',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:8}}>
             <span style={{color:'#fff',fontSize:16}}>🧑‍🏫</span>
           </div>
@@ -71,7 +185,7 @@ export default function Teacher() {
         {/* Class selector */}
         <div style={{padding:'12px 20px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
           <label style={{fontSize:11,color:'rgba(255,255,255,0.4)',display:'block',marginBottom:6}}>SELECTED CLASS</label>
-          <select value={selectedClass} onChange={e => setSelectedClass(e.target.value)}
+          <select value={selectedClass} onChange={e => handleClassChange(e.target.value)}
             style={{width:'100%',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',borderRadius:8,padding:'8px 10px',color:'#fff',fontSize:13,fontFamily:'Outfit,sans-serif',cursor:'pointer',outline:'none'}}>
             <option value="">Select class</option>
             {classes.map(c => (
@@ -80,9 +194,10 @@ export default function Teacher() {
           </select>
         </div>
 
+        {/* Nav tabs */}
         <div style={{flex:1,padding:'12px 0'}}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)}
+            <button key={t.id} onClick={() => handleTabChange(t.id)}
               style={{
                 width:'100%',display:'flex',alignItems:'center',gap:12,
                 padding:'12px 20px',border:'none',cursor:'pointer',
@@ -98,6 +213,7 @@ export default function Teacher() {
           ))}
         </div>
 
+        {/* Logout */}
         <div style={{padding:'16px 20px',borderTop:'1px solid rgba(255,255,255,0.08)'}}>
           <button onClick={handleLogout}
             style={{width:'100%',background:'rgba(255,255,255,0.06)',color:'rgba(255,255,255,0.5)',border:'none',borderRadius:8,padding:'10px',fontSize:13,cursor:'pointer',fontFamily:'Outfit,sans-serif',display:'flex',alignItems:'center',gap:8,justifyContent:'center'}}>
@@ -107,12 +223,16 @@ export default function Teacher() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div style={{marginLeft:220,flex:1,padding:'32px'}}>
+      <div className="main-content" style={{padding:'20px 16px 80px'}}>
         {!selectedClass && activeTab !== 'students' ? (
-          <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'60vh',gap:16}}>
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'70vh',gap:16,textAlign:'center'}}>
             <div style={{fontSize:48}}>📚</div>
             <h2 style={{fontFamily:'Cormorant Garamond,serif',fontSize:28,color:'#0a1628'}}>Select a Class</h2>
-            <p style={{color:'#888',fontSize:15}}>Please select a class from the sidebar to continue</p>
+            <p style={{color:'#888',fontSize:15,marginBottom:8}}>Tap the menu ☰ to select a class</p>
+            <button onClick={() => setSidebarOpen(true)}
+              style={{background:'#1a4fa0',color:'#fff',border:'none',borderRadius:10,padding:'12px 28px',fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'Outfit,sans-serif'}}>
+              ☰ Open Menu
+            </button>
           </div>
         ) : (
           <>
@@ -122,6 +242,7 @@ export default function Teacher() {
           </>
         )}
       </div>
+
     </div>
   )
 }
