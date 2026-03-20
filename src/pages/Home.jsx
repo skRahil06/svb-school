@@ -345,92 +345,108 @@ export default function Home() {
         </div>
       </div>
 
-
 {/* SSC TOPPERS */}
-{/* Toppers horizontal scroll */}
-<div style={{
-  display:'flex',
-  gap:12,
-  overflowX:'auto',
-  paddingBottom:16,
-  scrollSnapType:'x mandatory',
-  WebkitOverflowScrolling:'touch',
-  msOverflowStyle:'none',
-  scrollbarWidth:'none',
-}}>
-  <style>{`.toppers-scroll::-webkit-scrollbar{display:none}`}</style>
+<div style={{background:'#0a1628',padding:'60px 20px'}}>
+  <div style={{maxWidth:960,margin:'0 auto'}}>
 
-  {[
-    {year:'2025', name:'Sanavar', score:'584 / 600', best:true},
-    {year:'2024', name:'Akshaya', score:'550 / 600', best:true},
-    {year:'2023', name:'Devasri', score:'—'},
-    {year:'2022', name:'—', score:'Records Pending'},
-    {year:'2021', name:'—', score:'No SSC (COVID)'},
-    {year:'2020', name:'—', score:'No SSC (COVID)'},
-    {year:'2019', name:'Suresh', score:'GPA 9.8'},
-    {year:'2018', name:'SK Rahil', score:'GPA 9.8'},
-    {year:'2017', name:'Gayathri', score:'GPA 9.7'},
-    {year:'2016', name:'K Akhil', score:'GPA 9.5'},
-    {year:'2015', name:'B Harika', score:'GPA 9.5'},
-    {year:'2014', name:'SK Karishma', score:'GPA 9.7'},
-  ].map((t, i) => (
-    <div key={i} style={{
-      flexShrink:0,
-      width:140,
-      scrollSnapAlign:'start',
-      background: t.name === '—' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)',
-      border: `1px solid ${t.name === '—' ? 'rgba(255,255,255,0.06)' : t.best ? 'rgba(240,180,41,0.4)' : 'rgba(255,255,255,0.12)'}`,
-      borderRadius:16,padding:'20px 14px',textAlign:'center',
-      opacity: t.name === '—' ? 0.5 : 1,
-      transition:'transform 0.3s',
-    }}>
-      {/* Year badge */}
-      <div style={{
-        display:'inline-block',
-        background: t.name === '—' ? 'rgba(255,255,255,0.05)' : t.best ? 'rgba(240,180,41,0.2)' : 'rgba(255,255,255,0.08)',
-        color: t.name === '—' ? 'rgba(255,255,255,0.3)' : t.best ? '#f0b429' : 'rgba(255,255,255,0.6)',
-        fontSize:11,fontWeight:700,padding:'3px 10px',
-        borderRadius:20,marginBottom:14,letterSpacing:'0.05em'
-      }}>
-        {t.year}
-      </div>
-
-      {/* Avatar */}
-      <div style={{
-        width:52,height:52,borderRadius:'50%',
-        background: t.name === '—' ? 'rgba(255,255,255,0.05)' : t.best ? 'linear-gradient(135deg,#f0b429,#e09020)' : 'linear-gradient(135deg,#1a4fa0,#2563c4)',
-        display:'flex',alignItems:'center',justifyContent:'center',
-        margin:'0 auto 12px',
-        border: t.name === '—' ? '2px solid rgba(255,255,255,0.08)' : t.best ? '2px solid rgba(240,180,41,0.5)' : '2px solid rgba(255,255,255,0.15)',
-        fontSize:20
-      }}>
-        {t.name === '—' ? '?' : t.best ? '🥇' : '🎓'}
-      </div>
-
-      {/* Name */}
-      <div style={{
-        fontSize:13,fontWeight:600,
-        color: t.name === '—' ? 'rgba(255,255,255,0.2)' : '#fff',
-        marginBottom:6,lineHeight:1.3
-      }}>
-        {t.name}
-      </div>
-
-      {/* Score */}
-      <div style={{
-        fontSize:11,
-        color: t.name === '—' ? 'rgba(255,255,255,0.2)' : t.best ? '#f0b429' : 'rgba(255,255,255,0.5)',
-        fontWeight: t.best ? 600 : 400
-      }}>
-        {t.score}
-      </div>
+    {/* Header */}
+    <div className="reveal" style={{fontSize:12,fontWeight:600,color:'#f0b429',letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:10}}>
+      Hall of Fame
     </div>
-  ))}
-</div>
+    <div className="reveal font-display" style={{fontSize:'clamp(28px,5vw,40px)',color:'#fff',lineHeight:1.2,marginBottom:10}}>
+      SSC Board Exam Toppers
+    </div>
+    <div className="reveal" style={{fontSize:15,color:'rgba(255,255,255,0.5)',marginBottom:32}}>
+      Our brightest stars — celebrating excellence since 2014
+    </div>
 
-{/* Scroll hint */}
-<div style={{textAlign:'center',marginTop:8,fontSize:12,color:'rgba(255,255,255,0.25)'}}>
-  ← scroll to see older results
+    {/* Horizontal scroll */}
+    <div style={{
+      display:'flex',
+      gap:12,
+      overflowX:'auto',
+      paddingBottom:16,
+      scrollSnapType:'x mandatory',
+      WebkitOverflowScrolling:'touch',
+      msOverflowStyle:'none',
+      scrollbarWidth:'none',
+    }}>
+      {[
+        {year:'2025', name:'Sanavar', score:'584 / 600', best:true},
+        {year:'2024', name:'Akshaya', score:'550 / 600', best:true},
+        {year:'2023', name:'Devasri', score:'—'},
+        {year:'2022', name:'—', score:'Records Pending'},
+        {year:'2021', name:'—', score:'No SSC (COVID)'},
+        {year:'2020', name:'—', score:'No SSC (COVID)'},
+        {year:'2019', name:'Suresh', score:'GPA 9.8'},
+        {year:'2018', name:'SK Rahil', score:'GPA 9.8'},
+        {year:'2017', name:'Gayathri', score:'GPA 9.7'},
+        {year:'2016', name:'K Akhil', score:'GPA 9.5'},
+        {year:'2015', name:'B Harika', score:'GPA 9.5'},
+        {year:'2014', name:'SK Karishma', score:'GPA 9.7'},
+      ].map((t, i) => (
+        <div key={i} style={{
+          flexShrink:0,
+          width:140,
+          scrollSnapAlign:'start',
+          background: t.name === '—' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)',
+          border:`1px solid ${t.name==='—' ? 'rgba(255,255,255,0.06)' : t.best ? 'rgba(240,180,41,0.4)' : 'rgba(255,255,255,0.12)'}`,
+          borderRadius:16,padding:'20px 14px',textAlign:'center',
+          opacity: t.name === '—' ? 0.5 : 1,
+          transition:'transform 0.3s',
+        }}>
+
+          {/* Year badge */}
+          <div style={{
+            display:'inline-block',
+            background: t.name==='—' ? 'rgba(255,255,255,0.05)' : t.best ? 'rgba(240,180,41,0.2)' : 'rgba(255,255,255,0.08)',
+            color: t.name==='—' ? 'rgba(255,255,255,0.3)' : t.best ? '#f0b429' : 'rgba(255,255,255,0.6)',
+            fontSize:11,fontWeight:700,padding:'3px 10px',
+            borderRadius:20,marginBottom:14,letterSpacing:'0.05em'
+          }}>
+            {t.year}
+          </div>
+
+          {/* Avatar */}
+          <div style={{
+            width:52,height:52,borderRadius:'50%',
+            background: t.name==='—' ? 'rgba(255,255,255,0.05)' : t.best ? 'linear-gradient(135deg,#f0b429,#e09020)' : 'linear-gradient(135deg,#1a4fa0,#2563c4)',
+            display:'flex',alignItems:'center',justifyContent:'center',
+            margin:'0 auto 12px',
+            border: t.name==='—' ? '2px solid rgba(255,255,255,0.08)' : t.best ? '2px solid rgba(240,180,41,0.5)' : '2px solid rgba(255,255,255,0.15)',
+            fontSize:20
+          }}>
+            {t.name==='—' ? '?' : t.best ? '🥇' : '🎓'}
+          </div>
+
+          {/* Name */}
+          <div style={{
+            fontSize:13,fontWeight:600,
+            color: t.name==='—' ? 'rgba(255,255,255,0.2)' : '#fff',
+            marginBottom:6,lineHeight:1.3
+          }}>
+            {t.name}
+          </div>
+
+          {/* Score */}
+          <div style={{
+            fontSize:11,
+            color: t.name==='—' ? 'rgba(255,255,255,0.2)' : t.best ? '#f0b429' : 'rgba(255,255,255,0.5)',
+            fontWeight: t.best ? 600 : 400
+          }}>
+            {t.score}
+          </div>
+
+        </div>
+      ))}
+    </div>
+
+    {/* Scroll hint */}
+    <div style={{textAlign:'center',marginTop:8,fontSize:12,color:'rgba(255,255,255,0.25)'}}>
+      ← swipe to see older results
+    </div>
+
+  </div>
 </div>
 
 
