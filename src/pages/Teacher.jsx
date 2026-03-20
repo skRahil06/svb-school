@@ -79,10 +79,10 @@ export default function Teacher() {
           transform: translateX(-100%);
           transition: transform 0.3s ease;
         }
-        .main-content {
-          margin-left: 0;
-          padding-top: 64px;
-        }
+.main-content {
+    margin-left: 0;
+    padding: 76px 16px 90px 16px;
+  }
 
         @media(min-width: 768px) {
           .sidebar {
@@ -91,10 +91,10 @@ export default function Teacher() {
           .sidebar-overlay {
             display: none !important;
           }
-          .main-content {
-            margin-left: 240px;
-            padding-top: 0;
-          }
+    .main-content {
+      margin-left: 240px;
+      padding: 32px;
+    }
           .mobile-topbar {
             display: none !important;
           }

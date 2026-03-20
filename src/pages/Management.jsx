@@ -49,32 +49,38 @@ export default function Management() {
 
   return (
     <div style={{minHeight:'100vh',background:'#f7f9ff',fontFamily:'Outfit,sans-serif'}}>
-      <style>{`
-        .mgmt-sidebar {
-          position: fixed; top: 0; left: 0; bottom: 0;
-          width: 220px; background: #0a1628;
-          display: flex; flex-direction: column;
-          z-index: 200;
-          transform: translateX(-100%);
-          transition: transform 0.3s ease;
-        }
-        .mgmt-overlay {
-          display: none; position: fixed; inset: 0;
-          background: rgba(0,0,0,0.5); z-index: 150;
-        }
-        .mgmt-main { margin-left: 0; padding-top: 64px; }
-        .mgmt-topbar { display: flex; }
+<style>{`
+  .mgmt-sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 220px; background: #0a1628;
+    display: flex; flex-direction: column;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .mgmt-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 150;
+  }
+  .mgmt-main { 
+    margin-left: 0; 
+    padding: 76px 16px 90px 16px;
+  }
+  .mgmt-topbar { display: flex; }
 
-        @media(min-width: 768px) {
-          .mgmt-sidebar { transform: translateX(0) !important; }
-          .mgmt-overlay { display: none !important; }
-          .mgmt-main { margin-left: 220px; padding-top: 0; }
-          .mgmt-topbar { display: none !important; }
-          .mgmt-bottombar { display: none !important; }
-        }
-        .mgmt-sidebar.open { transform: translateX(0); }
-        .mgmt-overlay.open { display: block !important; }
-      `}</style>
+  @media(min-width: 768px) {
+    .mgmt-sidebar { transform: translateX(0) !important; }
+    .mgmt-overlay { display: none !important; }
+    .mgmt-main { 
+      margin-left: 220px; 
+      padding: 32px;
+    }
+    .mgmt-topbar { display: none !important; }
+    .mgmt-bottombar { display: none !important; }
+  }
+  .mgmt-sidebar.open { transform: translateX(0); }
+  .mgmt-overlay.open { display: block !important; }
+`}</style>
 
       {/* MOBILE TOP BAR */}
       <div className="mgmt-topbar" style={{
@@ -163,7 +169,7 @@ export default function Management() {
       </div>
 
       {/* MAIN */}
-      <div className="mgmt-main" style={{padding:'20px 16px 80px'}}>
+      <div className="mgmt-main" style={{padding:'20px 16px 80px', paddingTop: '80px'}}>
         {activeTab === 'overview' && <OverviewTab />}
         {activeTab === 'attendance' && <AttendanceTab />}
         {activeTab === 'marks' && <MarksTab />}
