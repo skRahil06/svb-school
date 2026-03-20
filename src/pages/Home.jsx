@@ -243,7 +243,7 @@ export default function Home() {
                 sub:'Playclass through Class 10 — complete schooling',
                 address:'Venkateswarapuram, Nellore,\nAndhra Pradesh',
                 phone:'+91 8500041811',
-                email:'info@svbschool.edu.in',
+                email:'info.svbschool@gmail.com',
                 map:'https://maps.app.goo.gl/x1A9dd6gosiseZJu8',
                 bg:'linear-gradient(135deg,#1a4fa0,#2563c4)',
                 side:'left'
@@ -254,8 +254,8 @@ export default function Home() {
                 sub:'Air-conditioned early learning centre',
                 address:'Bhagat Singh Colony, Nellore,\nAndhra Pradesh',
                 phone:'+91 8500041811',
-                email:'info@svbschool.edu.in',
-                map:'https://maps.app.goo.gl/VqzNhRen6bJbWzg77',
+                email:'info.svbschool@gmail.com',
+                //map:'https://maps.app.goo.gl/VqzNhRen6bJbWzg77',
                 bg:'linear-gradient(135deg,#1565c0,#1976d2)',
                 side:'right'
                 },
