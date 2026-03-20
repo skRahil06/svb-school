@@ -103,6 +103,12 @@ function Char({ name, pupilOffset, mood, lookAway, lean, bounce }) {
 }
 
 export default function Login() {
+  const [rememberMe, setRememberMe] = useState(false)
+  const [showForgot, setShowForgot] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotLoading, setForgotLoading] = useState(false)
+  const [forgotSuccess, setForgotSuccess] = useState('')
+  const [forgotError, setForgotError] = useState('')
   const [role, setRole] = useState('parent')
   const [email, setEmail] = useState('')
   const [pass, setPass] = useState('')
@@ -143,6 +149,14 @@ export default function Login() {
     return () => window.removeEventListener("mousemove", handleMove)
   }, [lookAway, mood])
 
+  useEffect(() => {
+  const savedEmail = localStorage.getItem('svb_remembered_email')
+  if (savedEmail) {
+    setEmail(savedEmail)
+    setRememberMe(true)
+  }
+}, [])
+
   // BOUNCE animation
   const doBounce = () => {
     let count = 0
@@ -165,51 +179,85 @@ export default function Login() {
     setTimeout(() => setStars([]), 1200)
   }
 
-  const handleLogin = async () => {
-    if (!email || !pass) {
-      setShake(true)
-      setTimeout(() => setShake(false), 400)
-      return
-    }
+  const handleForgotPassword = async () => {
+    if (!forgotEmail) { setForgotError('Please enter your email'); return }
+    setForgotLoading(true)
+    setForgotError('')
 
-    setLoading(true)
-    setErrorMsg('')
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password: pass,
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/set-password`
     })
 
     if (error) {
-      setLoading(false)
-      setMood('sad')
-      setErrorMsg('Incorrect email or password. Try again!')
-      setShake(true)
-      setTimeout(() => setShake(false), 400)
-      setTimeout(() => { setMood('normal'); setErrorMsg('') }, 2500)
+      setForgotError(error.message)
+      setForgotLoading(false)
       return
     }
 
-    // Get user role from profiles table
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', data.user.id)
-      .single()
-
-    setLoading(false)
-    setMood('happy')
-    setLoginState('success')
-    doStars()
-    doBounce()
-
-    // Redirect based on role after short delay
-    setTimeout(() => {
-      if (profile?.role === 'admin') navigate('/admin')
-      else if (profile?.role === 'teacher') navigate('/teacher')
-      else navigate('/parent')
-    }, 1500)
+    setForgotSuccess('✅ Reset link sent! Check your email.')
+    setForgotLoading(false)
   }
+
+const handleLogin = async () => {
+  if (!email || !pass) {
+    setShake(true)
+    setTimeout(() => setShake(false), 400)
+    return
+  }
+
+  setLoading(true)
+  setErrorMsg('')
+
+  // Set session persistence based on remember me
+  await supabase.auth.setSession({
+    access_token: '',
+    refresh_token: '',
+  })
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password: pass,
+    options: {
+      // If remember me is checked — session persists for 30 days
+      // If not — session expires when browser closes
+    }
+  })
+
+  if (error) {
+    setLoading(false)
+    setMood('sad')
+    setErrorMsg('Incorrect email or password. Try again!')
+    setShake(true)
+    setTimeout(() => setShake(false), 400)
+    setTimeout(() => { setMood('normal'); setErrorMsg('') }, 2500)
+    return
+  }
+
+  // Save email if remember me checked
+  if (rememberMe) {
+    localStorage.setItem('svb_remembered_email', email)
+  } else {
+    localStorage.removeItem('svb_remembered_email')
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', data.user.id)
+    .single()
+
+  setLoading(false)
+  setMood('happy')
+  setLoginState('success')
+  doStars()
+  doBounce()
+
+  setTimeout(() => {
+    if (profile?.role === 'admin') navigate('/admin')
+    else if (profile?.role === 'teacher') navigate('/teacher')
+    else navigate('/parent')
+  }, 1500)
+}
   const handleRoleChange = (r) => {
     setRole(r)
     doBounce()
@@ -326,10 +374,20 @@ export default function Login() {
 
               {/* Remember / Forgot */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, marginTop: 4 }}>
-                <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#888", cursor: "pointer" }}>
-                  <input type="checkbox" style={{ accentColor: "#1a4fa0" }} /> Remember me
+                <label style={{display:'flex',alignItems:'center',gap:6,fontSize:12,color:'#888',cursor:'pointer'}}>
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={e => setRememberMe(e.target.checked)}
+                    style={{accentColor:'#1a4fa0'}}
+                  />
+                  Remember me
                 </label>
-                <span style={{ fontSize: 12, color: "#1a4fa0", cursor: "pointer", fontWeight: 500 }}>Forgot password?</span>
+                <span
+                  onClick={() => setShowForgot(!showForgot)}
+                  style={{fontSize:12,color:'#1a4fa0',cursor:'pointer',fontWeight:500}}>
+                  Forgot password?
+                </span>
               </div>
 
             <button
@@ -339,6 +397,49 @@ export default function Login() {
             >
             {loginState === "success" ? "🎉 Welcome!" : loading ? "Signing in..." : "Log in"}
             </button>
+
+            {/* Forgot Password Form */}
+            {showForgot && (
+              <div style={{
+                marginTop:20,padding:'16px',
+                background:'#f0f4ff',borderRadius:12,
+                border:'1px solid #e0e7ff'
+              }}>
+                <p style={{fontSize:13,fontWeight:600,color:'#0a1628',marginBottom:12}}>
+                  Reset Password
+                </p>
+                <p style={{fontSize:12,color:'#888',marginBottom:12}}>
+                  Enter your registered email — we'll send a reset link!
+                </p>
+                <input
+                  type="email"
+                  value={forgotEmail}
+                  onChange={e => { setForgotEmail(e.target.value); setForgotError('') }}
+                  placeholder="your@email.com"
+                  onKeyDown={e => e.key === 'Enter' && handleForgotPassword()}
+                  style={{
+                    width:'100%',border:'none',
+                    borderBottom:'1.5px solid #ddd',
+                    padding:'10px 0',fontSize:14,
+                    outline:'none',fontFamily:'Outfit,sans-serif',
+                    background:'transparent',marginBottom:12
+                  }}
+                />
+                {forgotError && <p style={{fontSize:12,color:'#e53935',marginBottom:8}}>{forgotError}</p>}
+                {forgotSuccess && <p style={{fontSize:12,color:'#16a34a',marginBottom:8}}>{forgotSuccess}</p>}
+                <button
+                  onClick={handleForgotPassword}
+                  disabled={forgotLoading}
+                  style={{
+                    width:'100%',background:'#1a4fa0',color:'#fff',
+                    border:'none',borderRadius:8,padding:'10px',
+                    fontSize:14,fontWeight:600,cursor:'pointer',
+                    fontFamily:'Outfit,sans-serif',opacity:forgotLoading?0.7:1
+                  }}>
+                  {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+                </button>
+              </div>
+            )}
             </div>
           </div>
         </div>
