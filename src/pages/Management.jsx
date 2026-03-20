@@ -494,7 +494,6 @@ const handleEditSave = async () => {
           {editMode ? '✕ Close Edit' : '✏️ Edit Attendance'}
         </button>
       </div>
-      <p style={{fontSize:14,color:'#888',marginBottom:24}}>Monitor and edit attendance across all classes</p>
 
       {/* EDIT MODE */}
       {editMode && (
