@@ -10,6 +10,7 @@ import {
 export default function Management() {
   const [activeTab, setActiveTab] = useState('overview')
   const [adminName, setAdminName] = useState('')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { checkAuth() }, [])
@@ -33,19 +34,94 @@ export default function Management() {
 
   const tabs = [
     { id: 'overview', icon: '📊', label: 'Overview' },
-    { id: 'users', icon: '👥', label: 'Users' },
     { id: 'attendance', icon: '📅', label: 'Attendance' },
     { id: 'marks', icon: '📝', label: 'Marks' },
     { id: 'students', icon: '🎓', label: 'Students' },
     { id: 'teachers', icon: '🧑‍🏫', label: 'Teachers' },
-    { id: 'yearly', icon: '📈', label: 'Yearly' }, 
+    { id: 'users', icon: '👥', label: 'Users' },
+    { id: 'yearly', icon: '📈', label: 'Yearly' },
   ]
 
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId)
+    setSidebarOpen(false)
+  }
+
   return (
-    <div style={{minHeight:'100vh',background:'#f7f9ff',fontFamily:'Outfit,sans-serif',display:'flex'}}>
+    <div style={{minHeight:'100vh',background:'#f7f9ff',fontFamily:'Outfit,sans-serif'}}>
+      <style>{`
+        .mgmt-sidebar {
+          position: fixed; top: 0; left: 0; bottom: 0;
+          width: 220px; background: #0a1628;
+          display: flex; flex-direction: column;
+          z-index: 200;
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+        }
+        .mgmt-overlay {
+          display: none; position: fixed; inset: 0;
+          background: rgba(0,0,0,0.5); z-index: 150;
+        }
+        .mgmt-main { margin-left: 0; padding-top: 64px; }
+        .mgmt-topbar { display: flex; }
+
+        @media(min-width: 768px) {
+          .mgmt-sidebar { transform: translateX(0) !important; }
+          .mgmt-overlay { display: none !important; }
+          .mgmt-main { margin-left: 220px; padding-top: 0; }
+          .mgmt-topbar { display: none !important; }
+          .mgmt-bottombar { display: none !important; }
+        }
+        .mgmt-sidebar.open { transform: translateX(0); }
+        .mgmt-overlay.open { display: block !important; }
+      `}</style>
+
+      {/* MOBILE TOP BAR */}
+      <div className="mgmt-topbar" style={{
+        position:'fixed',top:0,left:0,right:0,zIndex:100,
+        background:'#0a1628',padding:'12px 16px',
+        alignItems:'center',justifyContent:'space-between'
+      }}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <button onClick={() => setSidebarOpen(true)}
+            style={{background:'none',border:'none',cursor:'pointer',padding:4,display:'flex',flexDirection:'column',gap:4}}>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}/>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}/>
+            <span style={{display:'block',width:22,height:2,background:'#fff',borderRadius:2}}/>
+          </button>
+          <img src={logo} alt="SVB" style={{width:32,height:32,borderRadius:'50%',objectFit:'cover'}}/>
+          <span style={{color:'#fff',fontSize:14,fontWeight:500}}>Management</span>
+        </div>
+      </div>
+
+      {/* MOBILE BOTTOM TAB BAR */}
+      <div className="mgmt-bottombar" style={{
+        position:'fixed',bottom:0,left:0,right:0,zIndex:100,
+        background:'#fff',borderTop:'1px solid #e8f0fe',
+        display:'flex',overflowX:'auto'
+      }}>
+        {tabs.map(t => (
+          <button key={t.id} onClick={() => handleTabChange(t.id)}
+            style={{
+              flex:'0 0 auto',padding:'8px 12px',border:'none',cursor:'pointer',
+              background:'transparent',
+              color: activeTab===t.id ? '#1a4fa0' : '#888',
+              fontSize:9,fontFamily:'Outfit,sans-serif',fontWeight:500,
+              borderTop: activeTab===t.id ? '2px solid #1a4fa0' : '2px solid transparent',
+              display:'flex',flexDirection:'column',alignItems:'center',gap:2
+            }}>
+            <span style={{fontSize:16}}>{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* OVERLAY */}
+      <div className={`mgmt-overlay ${sidebarOpen?'open':''}`}
+        onClick={() => setSidebarOpen(false)}/>
 
       {/* SIDEBAR */}
-      <div style={{width:220,background:'#0a1628',display:'flex',flexDirection:'column',position:'fixed',top:0,left:0,bottom:0,zIndex:100}}>
+      <div className={`mgmt-sidebar ${sidebarOpen?'open':''}`}>
         <div style={{padding:'24px 20px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
           <div style={{display:'flex',alignItems:'center',gap:10}}>
             <img src={logo} alt="SVB" style={{width:36,height:36,borderRadius:'50%',objectFit:'cover',border:'2px solid rgba(255,255,255,0.2)'}}/>
@@ -54,7 +130,6 @@ export default function Management() {
             </div>
           </div>
         </div>
-
         <div style={{padding:'16px 20px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
           <div style={{width:36,height:36,borderRadius:'50%',background:'#7c3aed',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:8}}>
             <span style={{color:'#fff',fontSize:16}}>📊</span>
@@ -62,10 +137,9 @@ export default function Management() {
           <div style={{fontSize:13,color:'#fff',fontWeight:500}}>{adminName || 'Management'}</div>
           <div style={{fontSize:11,color:'rgba(255,255,255,0.4)',marginTop:2}}>Administrator</div>
         </div>
-
-        <div style={{flex:1,padding:'12px 0'}}>
+        <div style={{flex:1,padding:'12px 0',overflowY:'auto'}}>
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)}
+            <button key={t.id} onClick={() => handleTabChange(t.id)}
               style={{
                 width:'100%',display:'flex',alignItems:'center',gap:12,
                 padding:'12px 20px',border:'none',cursor:'pointer',
@@ -80,7 +154,6 @@ export default function Management() {
             </button>
           ))}
         </div>
-
         <div style={{padding:'16px 20px',borderTop:'1px solid rgba(255,255,255,0.08)'}}>
           <button onClick={handleLogout}
             style={{width:'100%',background:'rgba(255,255,255,0.06)',color:'rgba(255,255,255,0.5)',border:'none',borderRadius:8,padding:'10px',fontSize:13,cursor:'pointer',fontFamily:'Outfit,sans-serif',display:'flex',alignItems:'center',gap:8,justifyContent:'center'}}>
@@ -90,13 +163,13 @@ export default function Management() {
       </div>
 
       {/* MAIN */}
-      <div style={{marginLeft:220,flex:1,padding:'32px'}}>
+      <div className="mgmt-main" style={{padding:'20px 16px 80px'}}>
         {activeTab === 'overview' && <OverviewTab />}
-        {activeTab === 'users' && <UsersTab />}
         {activeTab === 'attendance' && <AttendanceTab />}
         {activeTab === 'marks' && <MarksTab />}
         {activeTab === 'students' && <StudentsTab />}
         {activeTab === 'teachers' && <TeachersTab />}
+        {activeTab === 'users' && <UsersTab />}
         {activeTab === 'yearly' && <YearlyTab />}
       </div>
     </div>
@@ -262,6 +335,13 @@ function AttendanceTab() {
   const [selectedClass, setSelectedClass] = useState('all')
   const [classes, setClasses] = useState([])
   const [lowAttendance, setLowAttendance] = useState([])
+  const [editMode, setEditMode] = useState(false)
+  const [editDate, setEditDate] = useState(new Date().toISOString().split('T')[0])
+  const [editClass, setEditClass] = useState('')
+  const [editStudents, setEditStudents] = useState([])
+  const [editAttendance, setEditAttendance] = useState({})
+  const [editLoading, setEditLoading] = useState(false)
+  const [editSuccess, setEditSuccess] = useState('')
 
   useEffect(() => {
     fetchClasses()
@@ -288,14 +368,10 @@ function AttendanceTab() {
       const present = sAtt.filter(a => a.status === 'present').length
       const total = sAtt.length
       return {
-        ...s,
-        present,
-        absent: total - present,
-        total,
+        ...s, present, absent: total - present, total,
         pct: total > 0 ? Math.round((present / total) * 100) : 0
       }
     }) || []
-
     setClassData(result)
   }
 
@@ -303,11 +379,9 @@ function AttendanceTab() {
     const { data: students } = await supabase
       .from('students')
       .select('id, full_name, classes(class_name)')
-
     const { data: att } = await supabase
       .from('attendance')
       .select('student_id, status')
-
     const result = students?.map(s => {
       const sAtt = att?.filter(a => a.student_id === s.id) || []
       const present = sAtt.filter(a => a.status === 'present').length
@@ -316,15 +390,68 @@ function AttendanceTab() {
       return { ...s, pct, total }
     }).filter(s => s.pct < 75 && s.total > 0)
       .sort((a, b) => a.pct - b.pct) || []
-
     setLowAttendance(result)
+  }
+
+  const loadEditAttendance = async () => {
+    if (!editClass) return
+    const { data: students } = await supabase
+      .from('students')
+      .select('*')
+      .eq('class_id', editClass)
+      .order('roll_number')
+    setEditStudents(students || [])
+
+    const { data: existing } = await supabase
+      .from('attendance')
+      .select('student_id, status, id')
+      .eq('date', editDate)
+      .in('student_id', (students || []).map(s => s.id))
+
+    const att = {}
+    existing?.forEach(e => att[e.student_id] = { status: e.status, id: e.id })
+    // Default unset to present
+    students?.forEach(s => {
+      if (!att[s.id]) att[s.id] = { status: 'present', id: null }
+    })
+    setEditAttendance(att)
+  }
+
+  useEffect(() => {
+    if (editMode && editClass && editDate) loadEditAttendance()
+  }, [editClass, editDate, editMode])
+
+  const handleEditSave = async () => {
+    setEditLoading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+
+    for (const student of editStudents) {
+      const entry = editAttendance[student.id]
+      if (entry?.id) {
+        // Update existing
+        await supabase
+          .from('attendance')
+          .update({ status: entry.status })
+          .eq('id', entry.id)
+      } else {
+        // Insert new
+        await supabase
+          .from('attendance')
+          .insert({ student_id: student.id, date: editDate, status: entry?.status || 'present', marked_by: user.id })
+      }
+    }
+
+    setEditSuccess('✅ Attendance updated!')
+    setEditLoading(false)
+    fetchAttendanceData()
+    fetchLowAttendance()
+    setTimeout(() => setEditSuccess(''), 3000)
   }
 
   const filtered = selectedClass === 'all'
     ? classData
     : classData.filter(s => s.classes?.class_name === selectedClass)
 
-  // Pie chart data
   const totalPresent = filtered.reduce((sum, s) => sum + s.present, 0)
   const totalAbsent = filtered.reduce((sum, s) => sum + s.absent, 0)
   const pieData = [
@@ -334,8 +461,76 @@ function AttendanceTab() {
 
   return (
     <div>
-      <h1 style={{fontFamily:'Cormorant Garamond,serif',fontSize:32,color:'#0a1628',marginBottom:4}}>Attendance Analysis</h1>
-      <p style={{fontSize:14,color:'#888',marginBottom:24}}>Monitor attendance across all classes</p>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12,marginBottom:4}}>
+        <h1 style={{fontFamily:'Cormorant Garamond,serif',fontSize:32,color:'#0a1628'}}>Attendance</h1>
+        <button onClick={() => setEditMode(!editMode)}
+          style={{background: editMode ? '#fee2e2' : '#1a4fa0',color: editMode ? '#991b1b' : '#fff',
+            border:'none',borderRadius:8,padding:'9px 18px',fontSize:13,fontWeight:600,
+            cursor:'pointer',fontFamily:'Outfit,sans-serif'}}>
+          {editMode ? '✕ Close Edit' : '✏️ Edit Attendance'}
+        </button>
+      </div>
+      <p style={{fontSize:14,color:'#888',marginBottom:24}}>Monitor and edit attendance across all classes</p>
+
+      {/* EDIT MODE */}
+      {editMode && (
+        <div style={{background:'#fff',borderRadius:16,padding:'24px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'2px solid #1a4fa0',marginBottom:24}}>
+          <h3 style={{fontSize:15,fontWeight:600,color:'#1a4fa0',marginBottom:16}}>✏️ Edit Attendance</h3>
+          <div style={{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}}>
+            <div>
+              <label style={{fontSize:11,color:'#1a4fa0',fontWeight:500,display:'block',marginBottom:4}}>Date</label>
+              <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)}
+                style={{border:'1px solid #e0e7ff',borderRadius:8,padding:'8px 12px',fontSize:14,outline:'none',fontFamily:'Outfit,sans-serif'}}/>
+            </div>
+            <div>
+              <label style={{fontSize:11,color:'#1a4fa0',fontWeight:500,display:'block',marginBottom:4}}>Class</label>
+              <select value={editClass} onChange={e => setEditClass(e.target.value)}
+                style={{border:'1px solid #e0e7ff',borderRadius:8,padding:'8px 12px',fontSize:14,outline:'none',fontFamily:'Outfit,sans-serif',background:'#fff',cursor:'pointer'}}>
+                <option value="">Select class</option>
+                {classes.map(c => <option key={c.id} value={c.id}>{c.class_name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {editStudents.length > 0 && (
+            <>
+              <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16}}>
+                {editStudents.map(s => (
+                  <div key={s.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',
+                    padding:'12px 16px',borderRadius:10,cursor:'pointer',
+                    background: editAttendance[s.id]?.status === 'present' ? '#f0fdf4' : '#fff5f5',
+                    border: `1px solid ${editAttendance[s.id]?.status === 'present' ? '#86efac' : '#fca5a5'}`}}
+                    onClick={() => setEditAttendance(prev => ({
+                      ...prev,
+                      [s.id]: { ...prev[s.id], status: prev[s.id]?.status === 'present' ? 'absent' : 'present' }
+                    }))}>
+                    <div style={{display:'flex',alignItems:'center',gap:10}}>
+                      <div style={{width:28,height:28,borderRadius:'50%',
+                        background: editAttendance[s.id]?.status === 'present' ? '#22c55e' : '#ef4444',
+                        display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontSize:12}}>
+                        {editAttendance[s.id]?.status === 'present' ? '✓' : '✗'}
+                      </div>
+                      <div>
+                        <div style={{fontSize:14,fontWeight:500,color:'#0a1628'}}>{s.full_name}</div>
+                        <div style={{fontSize:12,color:'#888'}}>Roll No. {s.roll_number}</div>
+                      </div>
+                    </div>
+                    <span style={{fontSize:13,fontWeight:600,
+                      color: editAttendance[s.id]?.status === 'present' ? '#16a34a' : '#dc2626'}}>
+                      {editAttendance[s.id]?.status === 'present' ? 'Present' : 'Absent'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {editSuccess && <p style={{fontSize:13,color:'#065f46',marginBottom:12,background:'#d1fae5',padding:'8px 12px',borderRadius:8}}>{editSuccess}</p>}
+              <button onClick={handleEditSave} disabled={editLoading}
+                style={{background:'#1a4fa0',color:'#fff',border:'none',borderRadius:8,padding:'11px 28px',fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'Outfit,sans-serif',opacity:editLoading?0.7:1}}>
+                {editLoading ? 'Saving...' : '💾 Save Changes'}
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Class filter */}
       <div style={{display:'flex',gap:8,marginBottom:24,flexWrap:'wrap'}}>
@@ -358,7 +553,6 @@ function AttendanceTab() {
       </div>
 
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:24}}>
-        {/* Pie chart */}
         <div style={{background:'#fff',borderRadius:16,padding:'24px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'1px solid rgba(26,79,160,0.06)'}}>
           <h3 style={{fontSize:15,fontWeight:600,color:'#0a1628',marginBottom:16}}>Present vs Absent</h3>
           <ResponsiveContainer width="100%" height={200}>
@@ -373,9 +567,8 @@ function AttendanceTab() {
           </ResponsiveContainer>
         </div>
 
-        {/* Low attendance warning */}
         <div style={{background:'#fff',borderRadius:16,padding:'24px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'1px solid rgba(26,79,160,0.06)'}}>
-          <h3 style={{fontSize:15,fontWeight:600,color:'#dc2626',marginBottom:16}}>⚠️ Low Attendance (Below 75%)</h3>
+          <h3 style={{fontSize:15,fontWeight:600,color:'#dc2626',marginBottom:16}}>⚠️ Low Attendance</h3>
           {lowAttendance.length === 0 ? (
             <p style={{color:'#16a34a',fontSize:14}}>✅ All students above 75%!</p>
           ) : (
@@ -394,7 +587,6 @@ function AttendanceTab() {
         </div>
       </div>
 
-      {/* Student attendance table */}
       <div style={{background:'#fff',borderRadius:16,padding:'24px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'1px solid rgba(26,79,160,0.06)'}}>
         <h3 style={{fontSize:15,fontWeight:600,color:'#0a1628',marginBottom:16}}>Student-wise Attendance</h3>
         <table style={{width:'100%',borderCollapse:'collapse'}}>
@@ -436,18 +628,16 @@ function MarksTab() {
   const [selectedTerm, setSelectedTerm] = useState('FA1')
   const [marksData, setMarksData] = useState([])
   const [topScorers, setTopScorers] = useState([])
+  const [editMode, setEditMode] = useState(false)
+  const [editMarks, setEditMarks] = useState({})
+  const [editLoading, setEditLoading] = useState(false)
+  const [editSuccess, setEditSuccess] = useState('')
 
   const subjects = ['Maths','Science','Social Studies','English','Telugu','Hindi']
   const terms = ['FA1','FA2','FA3','FA4','SA1','SA2']
 
-  useEffect(() => {
-    fetchClasses()
-  }, [])
-
-  useEffect(() => {
-    fetchMarksData()
-    fetchTopScorers()
-  }, [selectedClass, selectedSubject, selectedTerm])
+  useEffect(() => { fetchClasses() }, [])
+  useEffect(() => { fetchMarksData(); fetchTopScorers() }, [selectedClass, selectedSubject, selectedTerm])
 
   const fetchClasses = async () => {
     const { data } = await supabase.from('classes').select('*').order('id')
@@ -464,12 +654,15 @@ function MarksTab() {
 
     const { data } = await query
     let filtered = data || []
-
     if (selectedClass !== 'all') {
       filtered = filtered.filter(m => m.students?.classes?.class_name === selectedClass)
     }
-
     setMarksData(filtered)
+
+    // Set edit marks
+    const em = {}
+    filtered.forEach(m => em[m.id] = m.score)
+    setEditMarks(em)
   }
 
   const fetchTopScorers = async () => {
@@ -479,17 +672,28 @@ function MarksTab() {
       .eq('term', selectedTerm)
       .order('score', { ascending: false })
       .limit(5)
-
     setTopScorers(data || [])
+  }
+
+  const handleEditSave = async () => {
+    setEditLoading(true)
+    for (const markId of Object.keys(editMarks)) {
+      await supabase
+        .from('marks')
+        .update({ score: parseInt(editMarks[markId]) })
+        .eq('id', markId)
+    }
+    setEditSuccess('✅ Marks updated!')
+    setEditLoading(false)
+    fetchMarksData()
+    setTimeout(() => setEditSuccess(''), 3000)
   }
 
   const avg = marksData.length > 0
     ? Math.round(marksData.reduce((sum, m) => sum + m.score, 0) / marksData.length)
     : 0
-
   const passed = marksData.filter(m => m.score >= 35).length
   const failed = marksData.filter(m => m.score < 35).length
-
   const chartData = marksData.slice(0, 15).map(m => ({
     name: m.students?.full_name?.split(' ')[0] || '',
     score: m.score
@@ -497,8 +701,16 @@ function MarksTab() {
 
   return (
     <div>
-      <h1 style={{fontFamily:'Cormorant Garamond,serif',fontSize:32,color:'#0a1628',marginBottom:4}}>Marks Analysis</h1>
-      <p style={{fontSize:14,color:'#888',marginBottom:24}}>Track academic performance across subjects</p>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12,marginBottom:4}}>
+        <h1 style={{fontFamily:'Cormorant Garamond,serif',fontSize:32,color:'#0a1628'}}>Marks</h1>
+        <button onClick={() => setEditMode(!editMode)}
+          style={{background: editMode ? '#fee2e2' : '#1a4fa0',color: editMode ? '#991b1b' : '#fff',
+            border:'none',borderRadius:8,padding:'9px 18px',fontSize:13,fontWeight:600,
+            cursor:'pointer',fontFamily:'Outfit,sans-serif'}}>
+          {editMode ? '✕ Close Edit' : '✏️ Edit Marks'}
+        </button>
+      </div>
+      <p style={{fontSize:14,color:'#888',marginBottom:24}}>Track and edit academic performance</p>
 
       {/* Filters */}
       <div style={{display:'flex',gap:12,marginBottom:24,flexWrap:'wrap'}}>
@@ -526,6 +738,38 @@ function MarksTab() {
         </div>
       </div>
 
+      {/* Edit Mode */}
+      {editMode && marksData.length > 0 && (
+        <div style={{background:'#fff',borderRadius:16,padding:'24px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'2px solid #1a4fa0',marginBottom:24}}>
+          <h3 style={{fontSize:15,fontWeight:600,color:'#1a4fa0',marginBottom:16}}>
+            ✏️ Edit Marks — {selectedSubject} ({selectedTerm})
+          </h3>
+          <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16}}>
+            {marksData.map(m => (
+              <div key={m.id} style={{display:'grid',gridTemplateColumns:'1fr auto',gap:12,alignItems:'center',padding:'10px 16px',background:'#f7f9ff',borderRadius:8}}>
+                <div>
+                  <div style={{fontSize:14,fontWeight:500,color:'#0a1628'}}>{m.students?.full_name}</div>
+                  <div style={{fontSize:12,color:'#888'}}>{m.students?.classes?.class_name}</div>
+                </div>
+                <input type="number" min="0" max="100"
+                  value={editMarks[m.id] ?? m.score}
+                  onChange={e => {
+                    const val = Math.min(100, Math.max(0, parseInt(e.target.value) || 0))
+                    setEditMarks(prev => ({...prev, [m.id]: val}))
+                  }}
+                  style={{border:'1px solid #e0e7ff',borderRadius:8,padding:'8px 12px',fontSize:14,outline:'none',fontFamily:'Outfit,sans-serif',width:80,textAlign:'center'}}
+                />
+              </div>
+            ))}
+          </div>
+          {editSuccess && <p style={{fontSize:13,color:'#065f46',marginBottom:12,background:'#d1fae5',padding:'8px 12px',borderRadius:8}}>{editSuccess}</p>}
+          <button onClick={handleEditSave} disabled={editLoading}
+            style={{background:'#1a4fa0',color:'#fff',border:'none',borderRadius:8,padding:'11px 28px',fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'Outfit,sans-serif',opacity:editLoading?0.7:1}}>
+            {editLoading ? 'Saving...' : '💾 Save Changes'}
+          </button>
+        </div>
+      )}
+
       {/* Stats */}
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))',gap:12,marginBottom:24}}>
         {[
@@ -542,7 +786,6 @@ function MarksTab() {
       </div>
 
       <div style={{display:'grid',gridTemplateColumns:'2fr 1fr',gap:20,marginBottom:24}}>
-        {/* Bar chart */}
         <div style={{background:'#fff',borderRadius:16,padding:'24px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'1px solid rgba(26,79,160,0.06)'}}>
           <h3 style={{fontSize:15,fontWeight:600,color:'#0a1628',marginBottom:16}}>{selectedSubject} — {selectedTerm}</h3>
           <ResponsiveContainer width="100%" height={220}>
@@ -560,7 +803,6 @@ function MarksTab() {
           </ResponsiveContainer>
         </div>
 
-        {/* Top scorers */}
         <div style={{background:'#fff',borderRadius:16,padding:'24px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'1px solid rgba(26,79,160,0.06)'}}>
           <h3 style={{fontSize:15,fontWeight:600,color:'#0a1628',marginBottom:16}}>🏆 Top Scorers</h3>
           <div style={{display:'flex',flexDirection:'column',gap:8}}>
@@ -569,7 +811,7 @@ function MarksTab() {
                 <div style={{width:24,height:24,borderRadius:'50%',
                   background: i===0?'#f59e0b':i===1?'#94a3b8':i===2?'#b45309':'#e8f0fe',
                   display:'flex',alignItems:'center',justifyContent:'center',
-                  fontSize:11,fontWeight:700,color: i<3?'#fff':'#1a4fa0',flexShrink:0}}>
+                  fontSize:11,fontWeight:700,color:i<3?'#fff':'#1a4fa0',flexShrink:0}}>
                   {i+1}
                 </div>
                 <div style={{flex:1}}>
@@ -583,7 +825,6 @@ function MarksTab() {
         </div>
       </div>
 
-      {/* Marks table */}
       <div style={{background:'#fff',borderRadius:16,padding:'24px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'1px solid rgba(26,79,160,0.06)'}}>
         <h3 style={{fontSize:15,fontWeight:600,color:'#0a1628',marginBottom:16}}>All Students — {selectedSubject} ({selectedTerm})</h3>
         <table style={{width:'100%',borderCollapse:'collapse'}}>
@@ -1096,17 +1337,14 @@ function TeachersTab() {
 }
 
 function UsersTab() {
-  const [activeSection, setActiveSection] = useState('invite')
   const [email, setEmail] = useState('')
+  const [emails, setEmails] = useState('')
   const [role, setRole] = useState('parent')
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState('')
+  const [results, setResults] = useState([])
   const [error, setError] = useState('')
   const [users, setUsers] = useState([])
-  const [bulkEmails, setBulkEmails] = useState('')
-  const [bulkRole, setBulkRole] = useState('parent')
-  const [bulkLoading, setBulkLoading] = useState(false)
-  const [bulkResults, setBulkResults] = useState([])
+  const [activeSection, setActiveSection] = useState('invite')
   const [deleteLoading, setDeleteLoading] = useState(null)
 
   useEffect(() => { fetchUsers() }, [])
@@ -1138,93 +1376,63 @@ function UsersTab() {
     return true
   }
 
-  // Single invite
-  const handleSingleInvite = async () => {
-    if (!email) { setError('Please enter an email'); return }
-    setLoading(true); setError(''); setSuccess('')
-    try {
-      await sendInvite(email, role)
-      setSuccess(`✅ Invite sent to ${email}!`)
-      setEmail('')
-      fetchUsers()
-    } catch (err) {
-      setError(err.message)
-    }
-    setLoading(false)
-  }
-
-  // Bulk invite
-  const handleBulkInvite = async () => {
-    const emails = bulkEmails
+  const handleInvite = async () => {
+    const emailList = emails
       .split('\n')
       .map(e => e.trim())
       .filter(e => e && e.includes('@'))
 
-    if (emails.length === 0) { setError('Please enter valid emails'); return }
+    if (emailList.length === 0) { setError('Please enter at least one valid email'); return }
 
-    setBulkLoading(true)
-    setBulkResults([])
+    setLoading(true)
+    setResults([])
     setError('')
 
-    const results = []
-    for (const emailAddr of emails) {
+    const res = []
+    for (const emailAddr of emailList) {
       try {
-        await sendInvite(emailAddr, bulkRole)
-        results.push({ email: emailAddr, status: 'success' })
+        await sendInvite(emailAddr, role)
+        res.push({ email: emailAddr, status: 'success' })
       } catch (err) {
-        results.push({ email: emailAddr, status: 'error', message: err.message })
+        res.push({ email: emailAddr, status: 'error', message: err.message })
       }
-      // Small delay to avoid rate limiting
       await new Promise(r => setTimeout(r, 500))
     }
 
-    setBulkResults(results)
-    setBulkLoading(false)
+    setResults(res)
+    setLoading(false)
     fetchUsers()
   }
 
-  // Delete user
-const handleDelete = async (userId, userName) => {
-  if (!confirm(`Are you sure you want to remove ${userName}?`)) return
-  setDeleteLoading(userId)
-
-  try {
-    const { data: { session } } = await supabase.auth.getSession()
-    
-    console.log('Session:', session?.access_token ? 'exists' : 'missing')
-    console.log('URL:', `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-user`)
-
-    const response = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-user`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ userId })
+  const handleDelete = async (userId, userName) => {
+    if (!confirm(`Are you sure you want to remove ${userName}?`)) return
+    setDeleteLoading(userId)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-user`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ userId })
+        }
+      )
+      const data = await response.json()
+      if (!response.ok || data.error) {
+        alert('Failed: ' + (data.error || 'Unknown error'))
+        setDeleteLoading(null)
+        return
       }
-    )
-
-    console.log('Response status:', response.status)
-    const data = await response.json()
-    console.log('Response data:', data)
-
-    if (!response.ok || data.error) {
-      alert('Failed: ' + (data.error || 'Unknown error'))
-      setDeleteLoading(null)
-      return
+      fetchUsers()
+    } catch (err) {
+      alert('Error: ' + err.message)
     }
-
-    fetchUsers()
-  } catch (err) {
-    console.log('Catch error:', err)
-    alert('Error: ' + err.message)
+    setDeleteLoading(null)
   }
-
-  setDeleteLoading(null)
-}
 
   const roleColors = {
     admin: { bg:'#fee2e2', color:'#991b1b' },
@@ -1233,17 +1441,15 @@ const handleDelete = async (userId, userName) => {
   }
 
   const sections = [
-    { id:'invite', label:'➕ Single Invite' },
-    { id:'bulk', label:'📋 Bulk Invite' },
+    { id:'invite', label:'✉️ Invite Users' },
     { id:'list', label:'👥 All Users' },
   ]
 
   return (
     <div>
       <h1 style={{fontFamily:'Cormorant Garamond,serif',fontSize:32,color:'#0a1628',marginBottom:4}}>User Management</h1>
-      <p style={{fontSize:14,color:'#888',marginBottom:24}}>Invite, manage and remove school portal users</p>
+      <p style={{fontSize:14,color:'#888',marginBottom:24}}>Invite and manage school portal users</p>
 
-      {/* Section tabs */}
       <div style={{display:'flex',gap:8,marginBottom:24,background:'#fff',padding:6,borderRadius:12,width:'fit-content',boxShadow:'0 2px 8px rgba(26,79,160,0.06)'}}>
         {sections.map(s => (
           <button key={s.id} onClick={() => setActiveSection(s.id)}
@@ -1256,20 +1462,24 @@ const handleDelete = async (userId, userName) => {
         ))}
       </div>
 
-      {/* SINGLE INVITE */}
+      {/* INVITE */}
       {activeSection === 'invite' && (
         <div style={{background:'#fff',borderRadius:16,padding:'28px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'1px solid rgba(26,79,160,0.06)',maxWidth:600}}>
-          <h3 style={{fontSize:16,fontWeight:600,color:'#0a1628',marginBottom:6}}>Invite Single User</h3>
-          <p style={{fontSize:13,color:'#888',marginBottom:20}}>For new admissions or lateral entries</p>
+          <h3 style={{fontSize:16,fontWeight:600,color:'#0a1628',marginBottom:6}}>Invite Users</h3>
+          <p style={{fontSize:13,color:'#888',marginBottom:20}}>Enter one or multiple emails — one per line</p>
 
           <div style={{marginBottom:16}}>
-            <label style={{fontSize:11,color:'#1a4fa0',fontWeight:500,display:'block',marginBottom:6}}>Email Address</label>
-            <input type="email" value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="user@gmail.com"
-              onKeyDown={e => e.key === 'Enter' && handleSingleInvite()}
-              style={{width:'100%',border:'1px solid #e0e7ff',borderRadius:8,padding:'10px 12px',fontSize:14,outline:'none',fontFamily:'Outfit,sans-serif'}}
+            <label style={{fontSize:11,color:'#1a4fa0',fontWeight:500,display:'block',marginBottom:6}}>
+              Email Addresses (one per line)
+            </label>
+            <textarea value={emails} onChange={e => setEmails(e.target.value)}
+              placeholder={`parent1@gmail.com\nparent2@gmail.com\nteacher@gmail.com`}
+              rows={6}
+              style={{width:'100%',border:'1px solid #e0e7ff',borderRadius:8,padding:'10px 12px',fontSize:13,outline:'none',fontFamily:'Outfit,sans-serif',resize:'vertical',lineHeight:1.8}}
             />
+            <p style={{fontSize:11,color:'#888',marginTop:4}}>
+              {emails.split('\n').filter(e => e.trim() && e.includes('@')).length} valid email(s) detected
+            </p>
           </div>
 
           <div style={{marginBottom:20}}>
@@ -1282,72 +1492,27 @@ const handleDelete = async (userId, userName) => {
             </select>
           </div>
 
-          {success && <p style={{fontSize:13,color:'#065f46',marginBottom:12,background:'#d1fae5',padding:'8px 12px',borderRadius:8}}>{success}</p>}
           {error && <p style={{fontSize:13,color:'#991b1b',marginBottom:12,background:'#fee2e2',padding:'8px 12px',borderRadius:8}}>{error}</p>}
 
-          <button onClick={handleSingleInvite} disabled={loading}
-            style={{background:'#1a4fa0',color:'#fff',border:'none',borderRadius:8,padding:'11px 28px',fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'Outfit,sans-serif',opacity:loading?0.7:1}}>
-            {loading ? 'Sending...' : 'Send Invite ✉️'}
-          </button>
-        </div>
-      )}
-
-      {/* BULK INVITE */}
-      {activeSection === 'bulk' && (
-        <div style={{background:'#fff',borderRadius:16,padding:'28px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'1px solid rgba(26,79,160,0.06)',maxWidth:600}}>
-          <h3 style={{fontSize:16,fontWeight:600,color:'#0a1628',marginBottom:6}}>Bulk Invite Users</h3>
-          <p style={{fontSize:13,color:'#888',marginBottom:20}}>Invite multiple users at once — paste one email per line</p>
-
-          <div style={{marginBottom:16}}>
-            <label style={{fontSize:11,color:'#1a4fa0',fontWeight:500,display:'block',marginBottom:6}}>
-              Email Addresses (one per line)
-            </label>
-            <textarea
-              value={bulkEmails}
-              onChange={e => setBulkEmails(e.target.value)}
-              placeholder={`parent1@gmail.com\nparent2@gmail.com\nparent3@gmail.com`}
-              rows={8}
-              style={{width:'100%',border:'1px solid #e0e7ff',borderRadius:8,padding:'10px 12px',fontSize:13,outline:'none',fontFamily:'Outfit,sans-serif',resize:'vertical',lineHeight:1.8}}
-            />
-            <p style={{fontSize:11,color:'#888',marginTop:4}}>
-              {bulkEmails.split('\n').filter(e => e.trim() && e.includes('@')).length} valid emails detected
-            </p>
-          </div>
-
-          <div style={{marginBottom:20}}>
-            <label style={{fontSize:11,color:'#1a4fa0',fontWeight:500,display:'block',marginBottom:6}}>Role for all</label>
-            <select value={bulkRole} onChange={e => setBulkRole(e.target.value)}
-              style={{width:'100%',border:'1px solid #e0e7ff',borderRadius:8,padding:'10px 12px',fontSize:14,outline:'none',fontFamily:'Outfit,sans-serif',background:'#fff',cursor:'pointer'}}>
-              <option value="parent">👨‍👩‍👧 Parent</option>
-              <option value="teacher">🧑‍🏫 Teacher</option>
-              <option value="admin">📊 Admin</option>
-            </select>
-          </div>
-
-          {error && <p style={{fontSize:13,color:'#991b1b',marginBottom:12,background:'#fee2e2',padding:'8px 12px',borderRadius:8}}>{error}</p>}
-
-          <button onClick={handleBulkInvite} disabled={bulkLoading}
-            style={{background:'#1a4fa0',color:'#fff',border:'none',borderRadius:8,padding:'11px 28px',fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'Outfit,sans-serif',opacity:bulkLoading?0.7:1,marginBottom:20}}>
-            {bulkLoading ? '⏳ Sending invites...' : '📨 Send All Invites'}
+          <button onClick={handleInvite} disabled={loading}
+            style={{background:'#1a4fa0',color:'#fff',border:'none',borderRadius:8,padding:'11px 28px',fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'Outfit,sans-serif',opacity:loading?0.7:1,marginBottom:20}}>
+            {loading ? '⏳ Sending...' : '📨 Send Invite'}
           </button>
 
-          {/* Bulk results */}
-          {bulkResults.length > 0 && (
+          {results.length > 0 && (
             <div>
               <div style={{fontSize:13,fontWeight:600,color:'#0a1628',marginBottom:10}}>
-                Results: {bulkResults.filter(r => r.status === 'success').length} sent,{' '}
-                {bulkResults.filter(r => r.status === 'error').length} failed
+                Results: {results.filter(r => r.status==='success').length} sent, {results.filter(r => r.status==='error').length} failed
               </div>
               <div style={{display:'flex',flexDirection:'column',gap:6,maxHeight:240,overflowY:'auto'}}>
-                {bulkResults.map((r, i) => (
+                {results.map((r,i) => (
                   <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',
                     padding:'8px 12px',borderRadius:8,
-                    background: r.status === 'success' ? '#f0fdf4' : '#fff5f5',
-                    border: `1px solid ${r.status === 'success' ? '#86efac' : '#fca5a5'}`}}>
+                    background: r.status==='success' ? '#f0fdf4' : '#fff5f5',
+                    border: `1px solid ${r.status==='success' ? '#86efac' : '#fca5a5'}`}}>
                     <span style={{fontSize:13,color:'#555'}}>{r.email}</span>
-                    <span style={{fontSize:12,fontWeight:600,
-                      color: r.status === 'success' ? '#16a34a' : '#dc2626'}}>
-                      {r.status === 'success' ? '✅ Sent' : `❌ ${r.message}`}
+                    <span style={{fontSize:12,fontWeight:600,color: r.status==='success' ? '#16a34a' : '#dc2626'}}>
+                      {r.status==='success' ? '✅ Sent' : `❌ ${r.message}`}
                     </span>
                   </div>
                 ))}
@@ -1357,12 +1522,10 @@ const handleDelete = async (userId, userName) => {
         </div>
       )}
 
-      {/* ALL USERS LIST */}
+      {/* USERS LIST */}
       {activeSection === 'list' && (
         <div style={{background:'#fff',borderRadius:16,padding:'28px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'1px solid rgba(26,79,160,0.06)'}}>
-          <h3 style={{fontSize:16,fontWeight:600,color:'#0a1628',marginBottom:20}}>
-            All Users ({users.length})
-          </h3>
+          <h3 style={{fontSize:16,fontWeight:600,color:'#0a1628',marginBottom:20}}>All Users ({users.length})</h3>
           {users.length === 0 ? (
             <p style={{color:'#aaa',fontSize:14,textAlign:'center',padding:'20px 0'}}>No users yet</p>
           ) : (
@@ -1371,7 +1534,6 @@ const handleDelete = async (userId, userName) => {
                 <div key={u.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',
                   padding:'14px 16px',background:'#f7f9ff',borderRadius:10,
                   border:'1px solid rgba(26,79,160,0.06)',flexWrap:'wrap',gap:10}}>
-
                   <div style={{display:'flex',alignItems:'center',gap:12}}>
                     <div style={{width:38,height:38,borderRadius:'50%',background:'#e8f0fe',
                       display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>
@@ -1382,19 +1544,17 @@ const handleDelete = async (userId, userName) => {
                       <div style={{fontSize:12,color:'#888',marginTop:1}}>{u.email}</div>
                     </div>
                   </div>
-
                   <div style={{display:'flex',alignItems:'center',gap:10}}>
                     <span style={{fontSize:11,fontWeight:600,padding:'3px 10px',borderRadius:20,
-                      ...(roleColors[u.role] || roleColors.parent)}}>
+                      ...(roleColors[u.role]||roleColors.parent)}}>
                       {u.role}
                     </span>
-                    <button
-                      onClick={() => handleDelete(u.id, u.full_name)}
-                      disabled={deleteLoading === u.id}
+                    <button onClick={() => handleDelete(u.id, u.full_name)}
+                      disabled={deleteLoading===u.id}
                       style={{background:'#fee2e2',color:'#991b1b',border:'none',borderRadius:8,
                         padding:'6px 12px',fontSize:12,fontWeight:500,cursor:'pointer',
                         fontFamily:'Outfit,sans-serif',opacity:deleteLoading===u.id?0.6:1}}>
-                      {deleteLoading === u.id ? '...' : '🗑️ Remove'}
+                      {deleteLoading===u.id ? '...' : '🗑️ Remove'}
                     </button>
                   </div>
                 </div>
