@@ -372,9 +372,9 @@ export default function Home() {
       scrollbarWidth:'none',
     }}>
       {[
-        {year:'2025', name:'Sanavar', score:'584 / 600', best:true},
-        {year:'2024', name:'Akshaya', score:'550 / 600', best:true},
-        {year:'2023', name:'Devasri', score:'—'},
+        {year:'2025', name:'SD Sanavar', score:'584 / 600'},
+        {year:'2024', name:'Devasri', score:'550 / 600'},
+        {year:'2023', name:'Akshaya', score:'—'},
         {year:'2022', name:'—', score:'Records Pending'},
         {year:'2021', name:'—', score:'No SSC (COVID)'},
         {year:'2020', name:'—', score:'No SSC (COVID)'},
@@ -385,59 +385,53 @@ export default function Home() {
         {year:'2015', name:'B Harika', score:'GPA 9.5'},
         {year:'2014', name:'SK Karishma', score:'GPA 9.7'},
       ].map((t, i) => (
-        <div key={i} style={{
-          flexShrink:0,
-          width:140,
-          scrollSnapAlign:'start',
-          background: t.name === '—' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)',
-          border:`1px solid ${t.name==='—' ? 'rgba(255,255,255,0.06)' : t.best ? 'rgba(240,180,41,0.4)' : 'rgba(255,255,255,0.12)'}`,
-          borderRadius:16,padding:'20px 14px',textAlign:'center',
-          opacity: t.name === '—' ? 0.5 : 1,
-          transition:'transform 0.3s',
-        }}>
+<div key={i} style={{
+  flexShrink:0, width:140, scrollSnapAlign:'start',
+  background: t.name==='—' ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)',
+  border:`1px solid ${t.name==='—' ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.12)'}`,
+  borderRadius:16, padding:'20px 14px', textAlign:'center',
+  opacity: t.name==='—' ? 0.5 : 1,
+}}>
+  {/* Year badge */}
+  <div style={{
+    display:'inline-block',
+    background: t.name==='—' ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.08)',
+    color: t.name==='—' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.6)',
+    fontSize:11, fontWeight:700, padding:'3px 10px',
+    borderRadius:20, marginBottom:14, letterSpacing:'0.05em'
+  }}>
+    {t.year}
+  </div>
 
-          {/* Year badge */}
-          <div style={{
-            display:'inline-block',
-            background: t.name==='—' ? 'rgba(255,255,255,0.05)' : t.best ? 'rgba(240,180,41,0.2)' : 'rgba(255,255,255,0.08)',
-            color: t.name==='—' ? 'rgba(255,255,255,0.3)' : t.best ? '#f0b429' : 'rgba(255,255,255,0.6)',
-            fontSize:11,fontWeight:700,padding:'3px 10px',
-            borderRadius:20,marginBottom:14,letterSpacing:'0.05em'
-          }}>
-            {t.year}
-          </div>
+  {/* Avatar */}
+  <div style={{
+    width:52, height:52, borderRadius:'50%',
+    background: t.name==='—' ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg,#1a4fa0,#2563c4)',
+    display:'flex', alignItems:'center', justifyContent:'center',
+    margin:'0 auto 12px',
+    border: t.name==='—' ? '2px solid rgba(255,255,255,0.08)' : '2px solid rgba(255,255,255,0.15)',
+    fontSize:20
+  }}>
+    {t.name==='—' ? '?' : '🎓'}
+  </div>
 
-          {/* Avatar */}
-          <div style={{
-            width:52,height:52,borderRadius:'50%',
-            background: t.name==='—' ? 'rgba(255,255,255,0.05)' : t.best ? 'linear-gradient(135deg,#f0b429,#e09020)' : 'linear-gradient(135deg,#1a4fa0,#2563c4)',
-            display:'flex',alignItems:'center',justifyContent:'center',
-            margin:'0 auto 12px',
-            border: t.name==='—' ? '2px solid rgba(255,255,255,0.08)' : t.best ? '2px solid rgba(240,180,41,0.5)' : '2px solid rgba(255,255,255,0.15)',
-            fontSize:20
-          }}>
-            {t.name==='—' ? '?' : t.best ? '🥇' : '🎓'}
-          </div>
+  {/* Name */}
+  <div style={{
+    fontSize:13, fontWeight:600,
+    color: t.name==='—' ? 'rgba(255,255,255,0.2)' : '#fff',
+    marginBottom:6, lineHeight:1.3
+  }}>
+    {t.name}
+  </div>
 
-          {/* Name */}
-          <div style={{
-            fontSize:13,fontWeight:600,
-            color: t.name==='—' ? 'rgba(255,255,255,0.2)' : '#fff',
-            marginBottom:6,lineHeight:1.3
-          }}>
-            {t.name}
-          </div>
-
-          {/* Score */}
-          <div style={{
-            fontSize:11,
-            color: t.name==='—' ? 'rgba(255,255,255,0.2)' : t.best ? '#f0b429' : 'rgba(255,255,255,0.5)',
-            fontWeight: t.best ? 600 : 400
-          }}>
-            {t.score}
-          </div>
-
-        </div>
+  {/* Score */}
+  <div style={{
+    fontSize:11,
+    color: t.name==='—' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.5)',
+  }}>
+    {t.score}
+  </div>
+</div>
       ))}
     </div>
 
