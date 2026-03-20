@@ -119,7 +119,7 @@ const handleSaveProfile = async () => {
       .from('profiles')
       .upsert({
         id: user.id,
-        full_name: childName + "'s Parent",
+        full_name: childName,
         role: 'parent',
         phone: phone,
         email: user.email

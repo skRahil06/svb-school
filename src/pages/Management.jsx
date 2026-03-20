@@ -1559,7 +1559,7 @@ function UsersTab() {
                   <div style={{display:'flex',alignItems:'center',gap:12}}>
                     <div style={{width:38,height:38,borderRadius:'50%',background:'#e8f0fe',
                       display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>
-                      {u.role==='admin'?'📊':u.role==='teacher'?'🧑‍🏫':'👨‍👩‍👧'}
+                      {u.role==='admin'?'📊':u.role==='teacher'?'🧑‍🏫':'🎓'}
                     </div>
                     <div>
                       <div style={{fontSize:14,fontWeight:500,color:'#0a1628'}}>{u.full_name}</div>
