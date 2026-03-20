@@ -476,30 +476,23 @@ const handleEditSave = async () => {
 
   return (
     <div>
-<div style={{
-        display:'flex',alignItems:'flex-start',justifyContent:'space-between',
-        flexWrap:'wrap',gap:12,marginBottom:4
-      }}>
-        <div>
-          <h1 style={{fontFamily:'Cormorant Garamond,serif',fontSize:32,color:'#0a1628',marginBottom:4}}>
-            Attendance
-          </h1>
-          <p style={{fontSize:14,color:'#888',marginBottom:0}}>
-            Monitor and edit attendance across all classes
-          </p>
-        </div>
-        <button onClick={() => setEditMode(!editMode)}
-          style={{
-            background: editMode ? '#fee2e2' : '#1a4fa0',
-            color: editMode ? '#991b1b' : '#fff',
-            border:'none',borderRadius:8,padding:'9px 18px',
-            fontSize:13,fontWeight:600,cursor:'pointer',
-            fontFamily:'Outfit,sans-serif',
-            flexShrink:0,marginTop:4
-          }}>
-          {editMode ? '✕ Close Edit' : '✏️ Edit Attendance'}
-        </button>
-      </div>
+<div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',flexWrap:'nowrap',gap:12,marginBottom:4}}>
+  <div>
+    <h1 style={{fontFamily:'Cormorant Garamond,serif',fontSize:32,color:'#0a1628',marginBottom:4}}>Attendance</h1>
+    <p style={{fontSize:14,color:'#888',marginBottom:24}}>Monitor and edit attendance across all classes</p>
+  </div>
+  <button onClick={() => setEditMode(!editMode)}
+    style={{
+      background: editMode ? '#fee2e2' : '#1a4fa0',
+      color: editMode ? '#991b1b' : '#fff',
+      border:'none',borderRadius:8,padding:'9px 18px',
+      fontSize:13,fontWeight:600,cursor:'pointer',
+      fontFamily:'Outfit,sans-serif',
+      flexShrink:0,whiteSpace:'nowrap'
+    }}>
+    {editMode ? '✕ Close' : '✏️ Edit Attendance'}
+  </button>
+</div>
 
       {/* EDIT MODE */}
       {editMode && (
