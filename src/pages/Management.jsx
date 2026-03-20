@@ -421,32 +421,41 @@ function AttendanceTab() {
     if (editMode && editClass && editDate) loadEditAttendance()
   }, [editClass, editDate, editMode])
 
-  const handleEditSave = async () => {
-    setEditLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
+const handleEditSave = async () => {
+  setEditLoading(true)
+  const { data: { user } } = await supabase.auth.getUser()
 
-    for (const student of editStudents) {
-      const entry = editAttendance[student.id]
-      if (entry?.id) {
-        // Update existing
-        await supabase
-          .from('attendance')
-          .update({ status: entry.status })
-          .eq('id', entry.id)
-      } else {
-        // Insert new
-        await supabase
-          .from('attendance')
-          .insert({ student_id: student.id, date: editDate, status: entry?.status || 'present', marked_by: user.id })
-      }
+  for (const student of editStudents) {
+    const entry = editAttendance[student.id]
+    if (entry?.id) {
+      // Update existing record
+      await supabase
+        .from('attendance')
+        .update({ status: entry.status })
+        .eq('id', entry.id)
+    } else {
+      // Insert new record
+      await supabase
+        .from('attendance')
+        .insert({ 
+          student_id: student.id, 
+          date: editDate, 
+          status: entry?.status || 'present', 
+          marked_by: user.id 
+        })
     }
-
-    setEditSuccess('✅ Attendance updated!')
-    setEditLoading(false)
-    fetchAttendanceData()
-    fetchLowAttendance()
-    setTimeout(() => setEditSuccess(''), 3000)
   }
+
+  setEditSuccess('✅ Attendance updated!')
+  setEditLoading(false)
+  
+  // Re-fetch everything
+  await fetchAttendanceData()
+  await fetchLowAttendance()
+  await loadEditAttendance() // ← reload edit section too!
+  
+  setTimeout(() => setEditSuccess(''), 3000)
+}
 
   const filtered = selectedClass === 'all'
     ? classData
@@ -461,12 +470,27 @@ function AttendanceTab() {
 
   return (
     <div>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12,marginBottom:4}}>
-        <h1 style={{fontFamily:'Cormorant Garamond,serif',fontSize:32,color:'#0a1628'}}>Attendance</h1>
+<div style={{
+        display:'flex',alignItems:'flex-start',justifyContent:'space-between',
+        flexWrap:'wrap',gap:12,marginBottom:4
+      }}>
+        <div>
+          <h1 style={{fontFamily:'Cormorant Garamond,serif',fontSize:32,color:'#0a1628',marginBottom:4}}>
+            Attendance
+          </h1>
+          <p style={{fontSize:14,color:'#888',marginBottom:0}}>
+            Monitor and edit attendance across all classes
+          </p>
+        </div>
         <button onClick={() => setEditMode(!editMode)}
-          style={{background: editMode ? '#fee2e2' : '#1a4fa0',color: editMode ? '#991b1b' : '#fff',
-            border:'none',borderRadius:8,padding:'9px 18px',fontSize:13,fontWeight:600,
-            cursor:'pointer',fontFamily:'Outfit,sans-serif'}}>
+          style={{
+            background: editMode ? '#fee2e2' : '#1a4fa0',
+            color: editMode ? '#991b1b' : '#fff',
+            border:'none',borderRadius:8,padding:'9px 18px',
+            fontSize:13,fontWeight:600,cursor:'pointer',
+            fontFamily:'Outfit,sans-serif',
+            flexShrink:0,marginTop:4
+          }}>
           {editMode ? '✕ Close Edit' : '✏️ Edit Attendance'}
         </button>
       </div>
