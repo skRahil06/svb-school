@@ -9,6 +9,7 @@ const classes = [
 ]
 
 export default function SetPassword() {
+  const [skipProfile, setSkipProfile] = useState(false)
   const [step, setStep] = useState(1) // 1=password, 2=profile
   const [role, setRole] = useState('')
   const [password, setPassword] = useState('')
@@ -31,48 +32,43 @@ export default function SetPassword() {
 
 useEffect(() => {
   const handleAuth = async () => {
-    try {
-      // First check URL params for invite token
-      const params = new URLSearchParams(window.location.search)
-      const tokenHash = params.get('token_hash')
-      const type = params.get('type')
+    const hashParams = new URLSearchParams(window.location.hash.substring(1))
+    const accessToken = hashParams.get('access_token')
+    const refreshToken = hashParams.get('refresh_token')
 
-      if (tokenHash && type) {
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash: tokenHash,
-          type: type,
-        })
-        if (error) { console.log('OTP error:', error.message); return }
+    if (accessToken) {
+      await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      })
+    }
+
+    const params = new URLSearchParams(window.location.search)
+    const tokenHash = params.get('token_hash')
+    const type = params.get('type')
+
+    if (tokenHash && type) {
+      await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
+    }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user?.user_metadata?.role) {
+      setRole(user.user_metadata.role)
+    }
+
+    // ✅ Check if profile already exists
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+      if (profile) {
+        // Profile exists — this is a password reset, not first time setup
+        // Skip to step 1 only, no profile step needed
+        setSkipProfile(true)
       }
-
-      // Check hash for password recovery
-      const hash = window.location.hash
-      if (hash && hash.includes('access_token')) {
-        const hashParams = new URLSearchParams(hash.substring(1))
-        const accessToken = hashParams.get('access_token')
-        const refreshToken = hashParams.get('refresh_token')
-        if (accessToken) {
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken ?? ''
-          })
-          if (error) { console.log('Session error:', error.message); return }
-        }
-      }
-
-      // Wait a moment for session to establish
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      // Now get user
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
-      if (userError) { console.log('User error:', userError.message); return }
-
-      if (user?.user_metadata?.role) {
-        setRole(user.user_metadata.role)
-      }
-
-    } catch (err) {
-      console.log('Auth error:', err.message)
     }
   }
 
@@ -80,17 +76,35 @@ useEffect(() => {
 }, [])
 
 const handleSetPassword = async () => {
-  if (password.length < 6) { 
-    setError('Password must be at least 6 characters'); return 
-  }
-  if (password !== confirm) { 
-    setError('Passwords do not match!'); return 
-  }
+  if (password.length < 6) { setError('Password must be at least 6 characters'); return }
+  if (password !== confirm) { setError('Passwords do not match!'); return }
+
   setLoading(true)
   const { error } = await supabase.auth.updateUser({ password })
   if (error) { setError(error.message); setLoading(false); return }
   setLoading(false)
-  setStep(2)  // everyone goes to step 2
+
+  // If profile already exists — go straight to login!
+  if (skipProfile) {
+    setDone(true)
+    setTimeout(() => navigate('/login'), 2000)
+    return
+  }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  const userRole = user?.user_metadata?.role
+
+  if (userRole === 'admin') {
+    await supabase.from('profiles').upsert({
+      id: user.id, full_name: 'Admin',
+      role: 'admin', email: user.email
+    })
+    setDone(true)
+    setTimeout(() => navigate('/login'), 2000)
+    return
+  }
+
+  setStep(2)
 }
 
 const handleSaveProfile = async () => {
@@ -169,10 +183,10 @@ const handleSaveProfile = async () => {
         <div style={{textAlign:'center',marginBottom:28}}>
           <img src={logo} alt="SVB" style={{width:56,height:56,borderRadius:'50%',objectFit:'cover',border:'2px solid #1a4fa0',marginBottom:12}}/>
           <h2 style={{fontFamily:'Cormorant Garamond,serif',fontSize:26,color:'#0a1628',marginBottom:4}}>
-            {done ? '🎉 All Set!' : step === 1 ? 'Set Your Password' : 'Complete Your Profile'}
+            {done ? '🎉 Password Updated!' : step === 1 ? 'Set Your Password' : 'Complete Your Profile'}
           </h2>
           <p style={{fontSize:13,color:'#aaa'}}>
-            {done ? 'Redirecting to login...' : step === 1 ? 'Create a secure password for your account' : `Welcome! Just a few more details`}
+            {done ? 'Redirecting to login...' : step === 1 && skipProfile ? 'Enter your new password' : step === 1 ? 'Create a secure password' : 'Just a few more details'}
           </p>
         </div>
 
