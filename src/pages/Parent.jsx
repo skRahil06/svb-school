@@ -14,29 +14,22 @@ export default function Parent() {
     checkAuth()
   }, [])
 
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { navigate('/login'); return }
+const checkAuth = async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { navigate('/login'); return }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, full_name')
-      .eq('id', user.id)
-      .single()
+  // Run profile + student fetch in parallel ⚡
+  const [profileResult, studentResult] = await Promise.all([
+    supabase.from('profiles').select('role, full_name').eq('id', user.id).single(),
+    supabase.from('students').select('*, classes(class_name)').eq('parent_id', user.id).single()
+  ])
 
-    if (profile?.role !== 'parent') { navigate('/login'); return }
-    setParentName(profile.full_name)
-
-    // Get child details
-    const { data: studentData } = await supabase
-      .from('students')
-      .select('*, classes(class_name)')
-      .eq('parent_id', user.id)
-      .single()
-
-    setStudent(studentData)
-    setLoading(false)
-  }
+  if (profileResult.data?.role !== 'parent') { navigate('/login'); return }
+  
+  setParentName(profileResult.data.full_name)
+  setStudent(studentResult.data)
+  setLoading(false)
+}
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -132,13 +125,16 @@ function DashboardTab({ student }) {
   const [recentMarks, setRecentMarks] = useState([])
   const [announcements, setAnnouncements] = useState([])
 
-  useEffect(() => {
-    if (student) {
-      fetchStats()
-      fetchRecentMarks()
+useEffect(() => {
+  if (student) {
+    // Run all 3 in parallel ⚡
+    Promise.all([
+      fetchStats(),
+      fetchRecentMarks(),
       fetchAnnouncements()
-    }
-  }, [student])
+    ])
+  }
+}, [student])
 
   const fetchStats = async () => {
     const { data } = await supabase
