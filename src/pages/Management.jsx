@@ -1359,6 +1359,8 @@ function TeachersTab() {
 }
 
 function UsersTab() {
+  const [pendingUsers, setPendingUsers] = useState([])
+  const [pendingLoading, setPendingLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [emails, setEmails] = useState('')
   const [role, setRole] = useState('parent')
@@ -1369,7 +1371,10 @@ function UsersTab() {
   const [activeSection, setActiveSection] = useState('invite')
   const [deleteLoading, setDeleteLoading] = useState(null)
 
-  useEffect(() => { fetchUsers() }, [])
+  useEffect(() => {
+  fetchUsers()
+  fetchPendingUsers()
+}, [])
 
   const fetchUsers = async () => {
     const { data } = await supabase
@@ -1396,6 +1401,43 @@ function UsersTab() {
     const data = await response.json()
     if (!response.ok || data.error) throw new Error(data.error || 'Failed')
     return true
+  }
+
+  const fetchPendingUsers = async () => {
+    setPendingLoading(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+
+      // Get all auth users
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-user`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          }
+        }
+      )
+      const data = await response.json()
+
+      // Get profile ids
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id')
+
+      const profileIds = profiles?.map(p => p.id) || []
+
+      // Find users without profiles = pending
+      const pending = data.users?.filter(u =>
+        !profileIds.includes(u.id)
+      ) || []
+
+      setPendingUsers(pending)
+    } catch (err) {
+      console.log('Error:', err)
+    }
+    setPendingLoading(false)
   }
 
   const handleInvite = async () => {
@@ -1464,6 +1506,7 @@ function UsersTab() {
 
   const sections = [
     { id:'invite', label:'✉️ Invite Users' },
+    { id:'pending', label:'⏳ Pending' },
     { id:'list', label:'👥 All Users' },
   ]
 
@@ -1543,6 +1586,70 @@ function UsersTab() {
           )}
         </div>
       )}
+
+      {/* PENDING INVITES */}
+{activeSection === 'pending' && (
+  <div style={{background:'#fff',borderRadius:16,padding:'28px',boxShadow:'0 2px 12px rgba(26,79,160,0.08)',border:'1px solid rgba(26,79,160,0.06)'}}>
+    <h3 style={{fontSize:16,fontWeight:600,color:'#0a1628',marginBottom:6}}>
+      ⏳ Pending Invites ({pendingUsers.length})
+    </h3>
+    <p style={{fontSize:13,color:'#888',marginBottom:20}}>
+      Users who received invite but haven't completed setup yet
+    </p>
+
+    {pendingLoading ? (
+      <p style={{color:'#aaa',fontSize:14}}>Loading...</p>
+    ) : pendingUsers.length === 0 ? (
+      <div style={{textAlign:'center',padding:'32px 0'}}>
+        <div style={{fontSize:36,marginBottom:12}}>🎉</div>
+        <p style={{color:'#16a34a',fontSize:14,fontWeight:500}}>
+          All invited users have completed setup!
+        </p>
+      </div>
+    ) : (
+      <div style={{display:'flex',flexDirection:'column',gap:10}}>
+        {pendingUsers.map(u => (
+          <div key={u.id} style={{
+            display:'flex',alignItems:'center',justifyContent:'space-between',
+            padding:'14px 16px',background:'#fffbeb',borderRadius:10,
+            border:'1px solid #fde68a',flexWrap:'wrap',gap:10
+          }}>
+            <div style={{display:'flex',alignItems:'center',gap:12}}>
+              <div style={{width:38,height:38,borderRadius:'50%',
+                background:'#fef3c7',display:'flex',alignItems:'center',
+                justifyContent:'center',fontSize:18,flexShrink:0}}>
+                ⏳
+              </div>
+              <div>
+                <div style={{fontSize:14,fontWeight:500,color:'#0a1628'}}>
+                  {u.email}
+                </div>
+                <div style={{fontSize:12,color:'#888',marginTop:1}}>
+                  Invited {new Date(u.created_at).toLocaleDateString('en-IN',{
+                    day:'numeric',month:'short',year:'numeric'
+                  })}
+                </div>
+              </div>
+            </div>
+            <div style={{display:'flex',gap:8}}>
+              <span style={{fontSize:11,fontWeight:600,padding:'3px 10px',
+                borderRadius:20,background:'#fef3c7',color:'#92400e'}}>
+                {u.user_metadata?.role || 'unknown'}
+              </span>
+              <button
+                onClick={() => handleDelete(u.id, u.email)}
+                style={{background:'#fee2e2',color:'#991b1b',border:'none',
+                  borderRadius:8,padding:'6px 12px',fontSize:12,fontWeight:500,
+                  cursor:'pointer',fontFamily:'Outfit,sans-serif'}}>
+                🗑️ Cancel
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
       {/* USERS LIST */}
       {activeSection === 'list' && (
