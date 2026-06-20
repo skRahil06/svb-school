@@ -199,20 +199,30 @@ export default function Login() {
   }
 
 const handleLogin = async () => {
-  if (!email || !pass) {
+  if (!email && !pass) {
+    setErrorMsg('Please enter your email and password.')
     setShake(true)
     setTimeout(() => setShake(false), 400)
+    setTimeout(() => setErrorMsg(''), 3000)
+    return
+  }
+  if (!email) {
+    setErrorMsg('Please enter your email.')
+    setShake(true)
+    setTimeout(() => setShake(false), 400)
+    setTimeout(() => setErrorMsg(''), 3000)
+    return
+  }
+  if (!pass) {
+    setErrorMsg('Please enter your password.')
+    setShake(true)
+    setTimeout(() => setShake(false), 400)
+    setTimeout(() => setErrorMsg(''), 3000)
     return
   }
 
   setLoading(true)
   setErrorMsg('')
-
-  // Set session persistence based on remember me
-  await supabase.auth.setSession({
-    access_token: '',
-    refresh_token: '',
-  })
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,

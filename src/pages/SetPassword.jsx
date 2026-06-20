@@ -119,6 +119,9 @@ const handleSaveProfile = async () => {
     if (!firstName || !lastName) {
       setError('Please fill all fields'); return
     }
+    if (firstName.trim().toLowerCase() === lastName.trim().toLowerCase()) {
+      setError('First name and last name cannot be the same.'); return
+    }
     if (!phone || phone.length !== 10) {
       setError('Please enter a valid 10 digit phone number'); return
     }
@@ -325,6 +328,11 @@ const handleSaveProfile = async () => {
             placeholder="e.g. Kumar"
             style={{width:'100%',border:'none',borderBottom:'1.5px solid #ddd',padding:'10px 0',fontSize:14,outline:'none',fontFamily:'Outfit,sans-serif'}}
           />
+            {lastName && firstName && lastName.trim().toLowerCase() === firstName.trim().toLowerCase() && (
+              <p style={{fontSize:11,color:'#e53935',marginTop:4}}>
+                First name and last name cannot be the same
+              </p>
+            )}
         </div>
 
         {/* Phone */}
